@@ -12,8 +12,6 @@ TEMPLATE_PATH = os.path.join(BASE_DIR, "static/certificate_template.jpg")
 CUSTOM_FONT_PATH = os.path.join(BASE_DIR, "fonts/GreatVibes-Regular.ttf") 
 
 # Fallback to a common font name often available on Linux systems
-# If this fails, the code will fall back to ImageFont.load_default()
-# We will not rely on a local 'arial.ttf' file unless it's bundled.
 FALLBACK_FONT_NAME = "DejaVuSans-Bold" 
 # --------------------------------------------------------------------------
 
@@ -28,7 +26,7 @@ def load_font_for_size(size):
         except Exception:
             pass # Failed to load custom font
             
-    # 2. Try common Linux system font (more likely to exist on Render than 'arial.ttf')
+    # 2. Try common Linux system font (more likely to exist on Render)
     try:
         return ImageFont.truetype(FALLBACK_FONT_NAME, size)
     except Exception:
@@ -74,15 +72,15 @@ def generate_certificate():
     max_width_fraction = 0.65
     max_text_width = img_w * max_width_fraction
     
-    # Current font size attempt: 45 is very small. Let's start higher (e.g., 100)
-    # The actual perfect size depends entirely on the correct font loading.
-    font, size, text_w = fit_font_to_width(draw, name, max_text_width, starting_size=35) 
+    # ADJUSTMENT 1: Use a balanced starting size (e.g., 85) to ensure good visibility.
+    font, size, text_w = fit_font_to_width(draw, name, max_text_width, starting_size=30) 
 
-    # Position (Adjusted to a slightly higher position for better alignment)
+    # Position
     x = (img_w - text_w) / 2
-    # The position 0.385 was for a large font. A smaller font usually needs a slightly lower Y-position 
-    # to center its baseline, but based on previous testing, let's try 0.355.
-    y = int(img_h * 0.375) 
+    
+    # ADJUSTMENT 2: Use the previously found y-position for the center above the paragraph.
+    # 0.335 is the sweet spot for vertical alignment on this template.
+    y = int(img_h * 0.390) 
 
     # Draw text
     text_color = (25, 25, 25)
