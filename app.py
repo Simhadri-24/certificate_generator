@@ -80,7 +80,7 @@ def generate_certificate():
     
     # ADJUSTMENT 2: Use the previously found y-position for the center above the paragraph.
     # 0.335 is the sweet spot for vertical alignment on this template.
-    y = int(img_h * 0.390) 
+    y = int(img_h * 0.400) 
 
     # Draw text
     text_color = (25, 25, 25)
