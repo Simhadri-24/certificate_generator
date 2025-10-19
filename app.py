@@ -4,22 +4,36 @@ import io, os, base64
 
 app = Flask(__name__)
 
-# Template and font paths
-TEMPLATE_PATH = "static/certificate_template.jpg"
-CUSTOM_FONT_PATH = "fonts/GreatVibes-Regular.ttf"    # optional font
-FALLBACK_FONT = "arial.ttf"  # make sure this exists on your system
+# --- CRITICAL FIXES: Use absolute paths relative to the script's directory ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Template and font paths (using os.path.join for cross-OS compatibility)
+TEMPLATE_PATH = os.path.join(BASE_DIR, "static/certificate_template.jpg")
+CUSTOM_FONT_PATH = os.path.join(BASE_DIR, "fonts/GreatVibes-Regular.ttf") 
+
+# Fallback to a common font name often available on Linux systems
+# If this fails, the code will fall back to ImageFont.load_default()
+# We will not rely on a local 'arial.ttf' file unless it's bundled.
+FALLBACK_FONT_NAME = "DejaVuSans-Bold" 
+# --------------------------------------------------------------------------
 
 # Helper functions
 def load_font_for_size(size):
-    """Load custom or fallback font."""
-    if CUSTOM_FONT_PATH and os.path.exists(CUSTOM_FONT_PATH):
+    """Load custom or a reliable system font."""
+    
+    # 1. Try Custom Font using absolute path
+    if os.path.exists(CUSTOM_FONT_PATH):
         try:
             return ImageFont.truetype(CUSTOM_FONT_PATH, size)
         except Exception:
-            pass
+            pass # Failed to load custom font
+            
+    # 2. Try common Linux system font (more likely to exist on Render than 'arial.ttf')
     try:
-        return ImageFont.truetype(FALLBACK_FONT, size)
+        return ImageFont.truetype(FALLBACK_FONT_NAME, size)
     except Exception:
+        
+        # 3. Final Fallback (Pillow's default bitmap font)
         return ImageFont.load_default()
 
 def fit_font_to_width(draw, text, max_width, starting_size=130, min_size=20):
@@ -27,11 +41,13 @@ def fit_font_to_width(draw, text, max_width, starting_size=130, min_size=20):
     size = starting_size
     while size >= min_size:
         font = load_font_for_size(size)
-        text_w = draw.textlength(text, font=font)
+        # Using draw.textlength is correct for width calculation
+        text_w = draw.textlength(text, font=font) 
         if text_w <= max_width:
             return font, size, text_w
         size -= 2
-    # fallback
+    
+    # fallback return
     min_font = load_font_for_size(min_size)
     min_text_w = draw.textlength(text, font=min_font)
     return min_font, min_size, min(min_text_w, max_width)
@@ -57,11 +73,16 @@ def generate_certificate():
     # Font settings
     max_width_fraction = 0.65
     max_text_width = img_w * max_width_fraction
-    font, size, text_w = fit_font_to_width(draw, name, max_text_width, starting_size=45)
+    
+    # Current font size attempt: 45 is very small. Let's start higher (e.g., 100)
+    # The actual perfect size depends entirely on the correct font loading.
+    font, size, text_w = fit_font_to_width(draw, name, max_text_width, starting_size=100) 
 
-    # Position
+    # Position (Adjusted to a slightly higher position for better alignment)
     x = (img_w - text_w) / 2
-    y = int(img_h * 0.385)
+    # The position 0.385 was for a large font. A smaller font usually needs a slightly lower Y-position 
+    # to center its baseline, but based on previous testing, let's try 0.355.
+    y = int(img_h * 0.355) 
 
     # Draw text
     text_color = (25, 25, 25)
