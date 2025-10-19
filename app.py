@@ -57,7 +57,7 @@ def generate_certificate():
     # Font settings
     max_width_fraction = 0.65
     max_text_width = img_w * max_width_fraction
-    font, size, text_w = fit_font_to_width(draw, name, max_text_width, starting_size=180)
+    font, size, text_w = fit_font_to_width(draw, name, max_text_width, starting_size=300)
 
     # Position
     x = (img_w - text_w) / 2
