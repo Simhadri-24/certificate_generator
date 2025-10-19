@@ -76,7 +76,7 @@ def generate_certificate():
     
     # Current font size attempt: 45 is very small. Let's start higher (e.g., 100)
     # The actual perfect size depends entirely on the correct font loading.
-    font, size, text_w = fit_font_to_width(draw, name, max_text_width, starting_size=100) 
+    font, size, text_w = fit_font_to_width(draw, name, max_text_width, starting_size=45) 
 
     # Position (Adjusted to a slightly higher position for better alignment)
     x = (img_w - text_w) / 2
